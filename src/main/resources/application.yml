@@ -1,6 +1,8 @@
 micronaut:
+  application:
+    name: holiday
   caches:
-    nager-cache:
+    nager:
       charset: 'UTF-8'
       expire-after-write: 24h
 

@@ -4,6 +4,7 @@ import com.assignment.service.HolidayService;
 import com.assignment.service.model.CountryHolidayListDto;
 import com.assignment.service.model.DateHolidayListDto;
 import com.assignment.service.model.HolidayDto;
+import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
@@ -27,9 +28,17 @@ public class HolidayController {
     }
 
     @Error(exception = IllegalArgumentException.class)
-    public HttpResponse<String> illegalArgument(Exception exception){
+    public HttpResponse<String> illegalArgument(IllegalArgumentException exception){
         return HttpResponse.badRequest(exception.getMessage());
     }
+
+    @Error(exception = Exception.class)
+    public HttpResponse<String> unexpectedException(HttpRequest request, Exception exception){
+        logger.error("Unexpected error processing request for holidays, path {}", request.getPath(), exception);
+        return HttpResponse.serverError(exception.getMessage());
+    }
+
+    //TODO @apiresponse @operation? Micornaut documentation of statuscodes?
 
     /**
      * Given a country name, returns the most recent celebrated 3 holidays (date and name).
@@ -39,16 +48,12 @@ public class HolidayController {
     @Get("/country/{countryName}/recent")
     @Produces(MediaType.APPLICATION_JSON)
     public HttpResponse<List<HolidayDto>> getRecentHolidays(final String countryName) {
-        try {
-            if (countryName == null || countryName.isBlank()){
-                return HttpResponse.badRequest();
-            }
-            var resp = holidayService.getRecentHolidays(countryName);
-            return HttpResponse.ok(resp);
-        } catch (Exception e) {
-            logger.error("Unexpected error processing request for recent holidays by country {}", countryName, e);
-            return HttpResponse.serverError();
+
+        if (countryName == null || countryName.isBlank()){
+            return HttpResponse.badRequest(); //todo more informative?
         }
+        var resp = holidayService.getRecentHolidays(countryName);
+        return HttpResponse.ok(resp);
     }
 
     /**
@@ -56,20 +61,15 @@ public class HolidayController {
      * Weekend is defined as saturday or sunday.
      * Descending order by date property.
      * @param year year under examination
-     * @param countryCodes list of ISO-3166-2 country codes
+     * @param countryCodes list of ISO-3166-2 country codes, empty list gives empty result
      * @return per country, public holidays not falling on weekends
      */
     @Get("/year/{year}/weekdayholidays")
     public HttpResponse<List<CountryHolidayListDto>> publicHolidaysWeekdays(final int year, @QueryValue List<String> countryCodes) {
-        try {
-            if (!isValidYear(year) || countryCodes.stream().anyMatch(c -> !isValidCountryCode(c))){
-                return HttpResponse.badRequest();
-            }
-            return HttpResponse.ok(holidayService.getWeekdayHolidaysPerCountry(year, countryCodes));
-        } catch (Exception e) {
-            logger.error("Unexpected error processing request for weekdayholidays given year {}", year, e);
-            return HttpResponse.serverError();
+        if (!isValidYear(year) || countryCodes.stream().anyMatch(c -> !isValidCountryCode(c))){
+            return HttpResponse.badRequest();  //todo more informative?
         }
+        return HttpResponse.ok(holidayService.getWeekdayHolidaysPerCountry(year, countryCodes));
     }
 
     /**
@@ -82,16 +82,13 @@ public class HolidayController {
      */
     @Get("/year/{year}/commonholidays/{countrycode1}/{countrycode2}")
     public HttpResponse<List<DateHolidayListDto>> publicHolidaysWeekdays(final int year, final String countrycode1, final String countrycode2) {
-        try {
-            if (countrycode1.equals(countrycode2) || !isValidCountryCode(countrycode1) || !isValidCountryCode(countrycode2)){
-                return HttpResponse.badRequest();
-            }
-            return HttpResponse.ok(holidayService.getCommonHolidays(year, countrycode1, countrycode2));
-
-        } catch (Exception e) {
-            logger.error("Unexpected error processing request for commonholidays given countries [{}, {}]", countrycode2, countrycode1 , e);
-            return HttpResponse.serverError();
+        if(!isValidYear(year)){
+            return HttpResponse.badRequest();  //todo more informative?
         }
+        if (countrycode1.equals(countrycode2) || !isValidCountryCode(countrycode1) || !isValidCountryCode(countrycode2)){
+            return HttpResponse.badRequest();  //todo more informative?
+        }
+        return HttpResponse.ok(holidayService.getCommonHolidays(year, countrycode1, countrycode2));
     }
 
     //Likely dynamic 50 +- years. No proper documentation found from Nager reg support
@@ -100,15 +97,6 @@ public class HolidayController {
     }
 
     private boolean isValidCountryCode(String countryCode){
-        try {
-            if (countryCode == null || countryCode.isBlank()){
-                return false;
-            }
-            Locale.IsoCountryCode.valueOf(countryCode.toUpperCase());
-            return true;
-        }catch (Exception e){
-            logger.error("Failure to determine locale ISO enum from provided country code {}", countryCode);
-            return false;
-        }
+        return Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2).contains(countryCode.toUpperCase());
     }
 }

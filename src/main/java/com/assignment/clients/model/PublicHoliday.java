@@ -13,6 +13,6 @@ public record PublicHoliday (
   @Nullable String countryCode,
   boolean global,
   @Nullable List<String> counties, //ISO-3166-2
-  @Nullable int launchYear,
+  @Nullable Integer launchYear,
   @Nullable List<HolidayTypes> types
 ){ }

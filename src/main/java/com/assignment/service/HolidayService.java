@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,7 +39,7 @@ public class HolidayService {
                     .toList();
 
         }catch (DateTimeParseException e){
-            logger.error("Failure to parse date of public holiday entity for country {}", countryName);
+            logger.error("Failure to parse date of public holiday entity. [getRecentHolidays]");
             throw new IllegalStateException("Invalid date format(s)", e);
         }
     }
@@ -47,11 +48,17 @@ public class HolidayService {
         var holidays = nagerDateFacade.getPublicHolidaysByCountryCode(year, countryCode);
         var weekendDays = List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
-        return holidays.stream()
-                .filter(publicHoliday -> !weekendDays.contains(LocalDate.parse(publicHoliday.date()).getDayOfWeek()))
-                .map(publicHoliday -> new HolidayDto(publicHoliday.name(), publicHoliday.date()))
-                .sorted((c1, c2) -> LocalDate.parse(c2.date()).compareTo(LocalDate.parse(c1.date())))
-                .toList();
+        try{
+            return holidays.stream()
+                    .filter(publicHoliday -> !weekendDays.contains(LocalDate.parse(publicHoliday.date()).getDayOfWeek()))
+                    .map(publicHoliday -> new HolidayDto(publicHoliday.name(), publicHoliday.date()))
+                    .sorted((c1, c2) -> LocalDate.parse(c2.date()).compareTo(LocalDate.parse(c1.date())))
+                    .toList();
+
+        }catch (DateTimeParseException e){
+            logger.error("Failure to parse date of public holiday entity. [getWeekdayHolidays]");
+            throw new IllegalStateException("Invalid date format(s)", e);
+        }
 
     }
 
@@ -65,14 +72,22 @@ public class HolidayService {
     public List<DateHolidayListDto> getCommonHolidays(int year, String countryCode1, String countryCode2){
         var holidaysC1 = nagerDateFacade.getPublicHolidaysByCountryCode(year, countryCode1);
         var holidaysC2 = nagerDateFacade.getPublicHolidaysByCountryCode(year, countryCode2);
-        holidaysC1.addAll(holidaysC2);
 
-        return holidaysC1.stream()
+        var holidays = new ArrayList<>(holidaysC1);
+        holidays.addAll(holidaysC2);
+
+        var commonHolidaysGroupedByDate = holidays.stream()
                 .collect(Collectors.groupingBy(PublicHoliday::date))
                 .entrySet().stream()
+                .filter(entry -> entry.getValue().size() > 1);
+
+        return commonHolidaysGroupedByDate
                 .map(entry -> new DateHolidayListDto(
                         entry.getKey(),
-                        entry.getValue().stream().map(PublicHoliday::localName).distinct().toList()))
+                        entry.getValue().stream()
+                                .map(PublicHoliday::localName)
+                                .filter(localName ->  localName != null && !localName.isEmpty())
+                                .distinct().toList()))
                 .toList();
     }
 }

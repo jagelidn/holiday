@@ -7,16 +7,13 @@ import io.micronaut.cache.annotation.Cacheable;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import jakarta.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
 
 @Singleton
-@CacheConfig("nager-cache")
+@CacheConfig("nager")
 public class NagerDateFacade {
-    private static final Logger logger = LoggerFactory.getLogger(NagerDateFacade.class);
     private final NagerDateClient nagerDateClient;
 
     public NagerDateFacade(NagerDateClient nagerDateClient){
@@ -27,7 +24,7 @@ public class NagerDateFacade {
         var country = getCountry(countryName);
 
         if (country.isEmpty() || country.get().countryCode() == null){
-            throw new IllegalArgumentException("Country unknown" + countryName);
+            throw new IllegalArgumentException("Country unknown " + countryName);
         }
 
         return getPublicHolidaysByCountryCode(year, country.get().countryCode());
@@ -38,7 +35,7 @@ public class NagerDateFacade {
             return nagerDateClient.getPublicHolidays(year, countryCode).join();
         }catch (HttpClientResponseException e){
             if(e.getStatus() == HttpStatus.NOT_FOUND) {
-                throw new IllegalArgumentException("CountryCode is unknown");
+                throw new IllegalArgumentException("CountryCode is unknown ");
             }
             throw e;
         }
