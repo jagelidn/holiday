@@ -1,5 +1,5 @@
 ## Holiday Service
-Service for retrieval of holiday information. Running Java 21 with Micronaut & Gradle.
+Service for retrieval of holiday information based on the public Nager data https://date.nager.at/Api. Running Java 21 with Micronaut & Gradle.
 
 See overview of supported countries here https://date.nager.at/Country/Coverage. 
 
