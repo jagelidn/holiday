@@ -7,7 +7,7 @@ See overview of supported countries here https://date.nager.at/Country/Coverage.
 #### Build
 
 ```
-./gradlew build
+./gradlew clean build
 ```
 
 #### Unit Testing
@@ -19,7 +19,7 @@ See overview of supported countries here https://date.nager.at/Country/Coverage.
 #### Run
 Application will run at http://localhost:8080
 ```
-./gradlew run
+MICRONAUT_ENVIRONMENTS=application.yaml ./gradlew run 
 ```
 
 ## Endpoints

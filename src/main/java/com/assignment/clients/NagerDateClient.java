@@ -19,6 +19,8 @@ public interface NagerDateClient {
     CompletableFuture<List<Country>> getAvailableCountries();
 
     @Get("/api/v3/PublicHolidays/{year}/{countryCode}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     CompletableFuture<Optional<List<PublicHoliday>>> getPublicHolidays(
             @PathVariable int year,
             @PathVariable String countryCode

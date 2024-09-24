@@ -2,10 +2,8 @@ package com.assignment.clients;
 
 import com.assignment.clients.model.Country;
 import com.assignment.clients.model.PublicHoliday;
-import com.assignment.service.HolidayService;
 import io.micronaut.cache.annotation.CacheConfig;
 import io.micronaut.cache.annotation.Cacheable;
-import io.micronaut.http.server.exceptions.NotFoundException;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +40,7 @@ public class NagerDateFacade {
 
     public Optional<Country> getCountry(String countryName){
         return getAvailableCountries().stream()
-                .filter(c -> c.name().equals(countryName))
+                .filter(c -> c.name().equalsIgnoreCase(countryName))
                 .findFirst();
     }
 
