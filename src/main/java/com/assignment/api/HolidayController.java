@@ -64,7 +64,7 @@ public class HolidayController {
      * Given a year and country codes, for each country return a number of public holidays not falling on weekends.
      * Weekend is defined as saturday or sunday.
      * Descending order by date property.
-     * @param year year under examination
+     * @param year year under examination, current support for range inclusive (1974 - 2074)
      * @param countryCodes list of ISO-3166-2 country codes, empty list gives empty result
      * @return per country, public holidays not falling on weekends
      */
