@@ -1,0 +1,14 @@
+micronaut:
+  application:
+    name: holiday
+  caches:
+    nager:
+      charset: 'UTF-8'
+      expire-after-write: 24h
+
+jackson:
+  mapper:
+    ACCEPT_CASE_INSENSITIVE_ENUMS: true
+
+nager:
+  host: "https://date.nager.at"
