@@ -1,25 +1,122 @@
-## Micronaut 4.6.2 Documentation
+## Holiday Service
+Service for retrieval of holiday information. Running Java 21 with Micronaut & Gradle.
 
-- [User Guide](https://docs.micronaut.io/4.6.2/guide/index.html)
-- [API Reference](https://docs.micronaut.io/4.6.2/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/4.6.2/guide/configurationreference.html)
-- [Micronaut Guides](https://guides.micronaut.io/index.html)
+## Run application
+#### Build
+
+```
+./gradlew build
+```
+
+#### Unit Testing
+
+```
+./gradlew clean test
+```
+
+#### Run
+Application will run at http://localhost:8080
+```
+./gradlew run
+```
+
+## Endpoints
+
+### /holiday/country/{countryName}/recent
+
+---
+##### ***GET***
+**Description:** Given a country name, return the last celebrated 3 holidays (date and english name).
+
+**Parameters**
+
+| Name | Located in | Description | Required | Schema |
+| --- | ---------- | ----------- | -------- | ---- |
+| countryName | path |  | Yes | string |
+
+
+**Responses**
+
+| Code | Description               | Schema              |
+|------|---------------------------|---------------------|
+| 200  | Successful response       | List < HolidayDto > |
+| 400  | wrong input data          |                     |
+| 404  | no result found for input |                     |
+
+
+### /holiday/year/{year}/weekdayholidays
+
+---
+##### ***GET***
+**Description:** Given a year and country codes, for each country code returns public holidays not falling on weekends.
+Weekend is defined as saturday or sunday. Sorted in descending order by date.
+
+**Parameters**
+
+| Name      | Located in | Description                                                     | Required | Schema       |
+|-----------|------------|-----------------------------------------------------------------| -------- |--------------|
+| year      | path       | Year under examination                                          | Yes | int          |
+| countries | query      | List of ISO-3166-2 country codes. Empty list gives empty result | Yes | List<String> |
+
+**Responses**
+
+| Code | Description               | Schema                        |
+|------|---------------------------|-------------------------------|
+| 200  | Successful response       | List< CountryHolidayListDto > |
+| 400  | wrong input data          |                               |
+
+### /holiday/year/{year}/commonholidays/{countrycode1}/{countrycode2}
+
+---
+##### ***GET***
+**Description:** Given a year and 2 country codes, returns the deduplicated list of dates celebrated in both countries.
+Country codes 1 & 2 cannot be the same.
+
+**Parameters**
+
+| Name         | Located in | Description                                                   | Required | Schema |
+|--------------|------------|---------------------------------------------------------------| -------- |--------|
+| year         | path       | Year under examination                                        | Yes | int    |
+| countrycode1 | path       | ISO-3166-2 country code | Yes | String |
+| countrycode2 | path       | ISO-3166-2 country code | Yes | String |
+
+
+**Responses**
+
+| Code | Description               | Schema                      |
+|------|---------------------------|-----------------------------|
+| 200  | Successful response       | List < DateHolidayListDto > |
+| 400  | wrong input data          |                             |
+
+
+### Models
+
 ---
 
-- [Shadow Gradle Plugin](https://plugins.gradle.org/plugin/com.github.johnrengelman.shadow)
-- [Micronaut Gradle Plugin documentation](https://micronaut-projects.github.io/micronaut-gradle-plugin/latest/)
-- [GraalVM Gradle Plugin documentation](https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html)
-## Feature serialization-jackson documentation
+#### HolidayDto
 
-- [Micronaut Serialization Jackson Core documentation](https://micronaut-projects.github.io/micronaut-serialization/latest/guide/)
-
-
-## Feature micronaut-aot documentation
-
-- [Micronaut AOT documentation](https://micronaut-projects.github.io/micronaut-aot/latest/guide/)
+| Name | Type   | Description          |
+|------|--------|----------------------|
+| name | string | english holiday name | 
+| date | string | yyyy-mm-dd           | 
 
 
+==============================
 
-./gradlew run
+#### DateHolidayListDto
 
-Endpoint documentation?
+| Name       | Type           | Description |
+|------------|----------------| ----------- |
+| date       | string         |  yyyy-mm-dd |
+| localNames | List< string > | country specific name |
+
+==============================
+
+#### CountryHolidayListDto
+
+| Name          | Type               | Description | 
+|---------------|--------------------| ----------- |
+| countryCode   | string             |  ISO-3166-2 country code|
+| holidays      | List< HolidayDto > | 
+
+==============================

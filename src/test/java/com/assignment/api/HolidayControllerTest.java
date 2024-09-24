@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
 
 
 @MicronautTest
@@ -41,13 +42,15 @@ class HolidayControllerTest {
                 .when()
                 .get("/holiday/country/{countryName}/recent", Map.of("countryName", countryName))
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("$", hasSize(3))
+                .body("name", hasItems("Whit Monday", "Pentecost", "Constitution Day"))
+                .body("date", hasItems("2024-05-20", "2024-05-19", "2024-05-17"));
 
-        //Todo verify output body
     }
 
     @Test
-    void testUnknownCountryName(){
+    void testRecentCelebrationsUnknownCountryName(){
         var countryName = "Not A Country";
 
         given().header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
@@ -55,7 +58,7 @@ class HolidayControllerTest {
                 .when()
                 .get("/holiday/country/{countryName}/recent", Map.of("countryName", countryName))
                 .then()
-                .statusCode(400);
+                .statusCode(404);
     }
 
     @Test
@@ -64,25 +67,38 @@ class HolidayControllerTest {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .when()
                 .get("/holiday/year/{year}/commonholidays/{countrycode1}/{countrycode2}",
-                        Map.of("year", "2024", "countrycode1", "NO", "countrycode2", "SE"))
+                        Map.of("year", "2024", "countrycode1", "JP", "countrycode2", "SE"))
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("$", hasSize(1))
+                .body("date", hasItems("2024-01-01"));
 
-        //Todo verify output body
+    }
+
+    @Test
+    void testCommonHolidaysSameCountryCode(){
+
+        given().header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .when()
+                .get("/holiday/year/{year}/commonholidays/{countrycode1}/{countrycode2}",
+                        Map.of("year", 2024, "countrycode1", "NO", "countrycode2", "NO"))
+                .then()
+                .statusCode(400);
     }
 
     @Test
     void testWeekdayHolidays(){
         given().header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .param("countryCodes", List.of("NL", "SE"))
+                .param("countryCodes", List.of("NL", "SE", "DK"))
                 .when()
                 .get("/holiday/year/{year}/weekdayholidays",
                         Map.of("year", "2023"))
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("$", hasSize(3));
 
-        //Todo verify output body
     }
 
 
@@ -112,5 +128,6 @@ class HolidayControllerTest {
                 .then()
                 .statusCode(400);
     }
+
 
 }

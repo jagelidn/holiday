@@ -15,7 +15,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Singleton
 public class HolidayService {
@@ -64,7 +63,7 @@ public class HolidayService {
 
     public List<CountryHolidayListDto> getWeekdayHolidaysPerCountry(int year, List<String> countryCodes){
         return countryCodes.stream()
-                .flatMap(country -> Stream.of(new CountryHolidayListDto(country, getWeekdayHolidays(year, country))))
+                .map(country -> new CountryHolidayListDto(country, getWeekdayHolidays(year, country)))
                 .toList();
     }
 

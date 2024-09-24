@@ -7,6 +7,7 @@ import io.micronaut.http.annotation.*;
 import io.micronaut.http.client.annotation.Client;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Client("${nager.host}")
@@ -18,7 +19,7 @@ public interface NagerDateClient {
     CompletableFuture<List<Country>> getAvailableCountries();
 
     @Get("/api/v3/PublicHolidays/{year}/{countryCode}")
-    CompletableFuture<List<PublicHoliday>> getPublicHolidays(
+    CompletableFuture<Optional<List<PublicHoliday>>> getPublicHolidays(
             @PathVariable int year,
             @PathVariable String countryCode
     );
