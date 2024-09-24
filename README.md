@@ -1,6 +1,8 @@
 ## Holiday Service
 Service for retrieval of holiday information. Running Java 21 with Micronaut & Gradle.
 
+See overview of countries which should be supported here https://date.nager.at/Country/Coverage.
+
 ## Run application
 #### Build
 
@@ -55,7 +57,7 @@ Weekend is defined as saturday or sunday. Sorted in descending order by date.
 
 | Name      | Located in | Description                                                     | Required | Schema       |
 |-----------|------------|-----------------------------------------------------------------| -------- |--------------|
-| year      | path       | Year under examination                                          | Yes | int          |
+| year      | path       | Year under examination (1974 - 2074)                                       | Yes | int          |
 | countries | query      | List of ISO-3166-2 country codes. Empty list gives empty result | Yes | List<String> |
 
 **Responses**
@@ -76,7 +78,7 @@ Country codes 1 & 2 cannot be the same.
 
 | Name         | Located in | Description                                                   | Required | Schema |
 |--------------|------------|---------------------------------------------------------------| -------- |--------|
-| year         | path       | Year under examination                                        | Yes | int    |
+| year         | path       | Year under examination (1974 - 2074)                                        | Yes | int    |
 | countrycode1 | path       | ISO-3166-2 country code | Yes | String |
 | countrycode2 | path       | ISO-3166-2 country code | Yes | String |
 
